@@ -3,7 +3,7 @@ var fs= require('fs');
 const app = express();
 var AipFaceClient = require("baidu-aip-sdk").face;
 var HttpClient = require("baidu-aip-sdk").HttpClient;
-const img = "./picture/face1.jpg";//imgurl 就是你的图片路径  
+const img = "./picture/ag-3.png";//imgurl 就是你的图片路径  
 
 function getBase64Image(img) {  
      var canvas = document.createElement("canvas");  
@@ -30,15 +30,10 @@ app.get('/', (req, res) => {
     var imageData = fs.readFileSync(img); // 例：fileUrl="D:\\test\\test.bmp"
     var image = imageData.toString("base64");
     var client=new AipFaceClient(app_id,api_key,secret_key);
-    //var image="https://image.baidu.com/search/detail?ct=503316480&z=0&ipn=d&word=%E4%BA%BA%E8%84%B8&step_word=&hs=0&pn=5&spn=0&di=36740&pi=0&rn=1&tn=baiduimagedetail&is=0%2C0&istype=2&ie=utf-8&oe=utf-8&in=&cl=2&lm=-1&st=-1&cs=3879284015%2C3445644955&os=3359767671%2C1883269863&simid=3211219284%2C3883597493&adpicid=0&lpn=0&ln=1475&fr=&fmq=1588153873253_R&fm=result&ic=&s=undefined&hd=&latest=&copyright=&se=&sme=&tab=0&width=&height=&face=undefined&ist=&jit=&cg=&bdtype=0&oriquery=&objurl=http%3A%2F%2Fattachbak.dataguru.cn%2Fattachments%2Fportal%2F201812%2F29%2F161729gqqfq4qa4oli51oi.jpg&fromurl=ippr_z2C%24qAzdH3FAzdH3Fwt_z%26e3B1wpw2767_z%26e3BvgAzdH3Fw6ptvsj-899nd-8_z%26e3Bip4s&gsm=3&rpstart=0&rpnum=0&islist=&querylist=&force=undefined";
     var imageType="BASE64";
-    client.detect(image,imageType).then(function (result){
-        console.log(result);
-        return res.json((result));
-    }).catch(function(err){
-        console.log(err);
-        return res.json(new Error(err,410));
-    });
+    //faceDetect(client,image,imageType,res);
+    //faceRegister(client,image,imageType,res);
+    faceSearch(client,image,imageType,res);
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
@@ -69,5 +64,42 @@ function intialbaidu(){
         requestOptions.timeout = 15000;
         // 返回参数
         return requestOptions;
+    });
+}
+
+function faceDetect(client,image,imageType,response){
+    client.detect(image,imageType).then(function (result){
+        console.log(result);
+        return response.json((result));
+    }).catch(function(err){
+        console.log(err);
+        return response.json(new Error(err,410));
+    });
+}
+function faceSearch(client,image,imageType,response){
+    var groupIdList = "group1,group2";
+    // 调用人脸搜索
+    client.search(image, imageType, groupIdList).then(function(result) {
+        console.log(JSON.stringify(result));
+        return response.json((result));
+    }).catch(function(err) {
+        // 如果发生网络错误
+        console.log(err);
+        return response.json(new Error(err,410));
+    });
+}
+
+function faceRegister(client,image,imageType,response){
+    var groupId = "group1";
+    var userId = "user1";
+
+    // 调用人脸注册
+    client.addUser(image, imageType, groupId, userId).then(function(result) {
+        console.log(JSON.stringify(result));
+        return response.json((result));
+    }).catch(function(err) {
+        // 如果发生网络错误
+        console.log(err);
+        return response.json(new Error(err,410));
     });
 }
