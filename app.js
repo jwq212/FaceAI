@@ -3,7 +3,10 @@ var fs= require('fs');
 const app = express();
 var AipFaceClient = require("baidu-aip-sdk").face;
 var HttpClient = require("baidu-aip-sdk").HttpClient;
-const img = "./picture/ag-3.png";//imgurl 就是你的图片路径  
+const img = "./picture/xingye-1.png";//imgurl 就是图片路径
+var groupId = "group1";
+var userId = "user3";
+var user_info="周星驰";  //图片的名字
 
 function getBase64Image(img) {  
      var canvas = document.createElement("canvas");  
@@ -33,22 +36,13 @@ app.get('/', (req, res) => {
     var imageType="BASE64";
     //faceDetect(client,image,imageType,res);
     //faceRegister(client,image,imageType,res);
+    //faceUpdate(client,image,imageType,res);
     faceSearch(client,image,imageType,res);
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 
-function baiduFace(req,res){
-    var client=new AipFaceClient(app_id,api_key,secret_key);
-    var image="https://image.baidu.com/search/detail?ct=503316480&z=0&ipn=d&word=%E4%BA%BA%E5%83%8F&step_word=&hs=0&pn=1&spn=0&di=17490&pi=0&rn=1&tn=baiduimagedetail&is=0%2C0&istype=2&ie=utf-8&oe=utf-8&in=&cl=2&lm=-1&st=-1&cs=2668322266%2C2142931327&os=3398421995%2C2223198448&simid=3522295409%2C432751500&adpicid=0&lpn=0&ln=1806&fr=&fmq=1588152457384_R&fm=result&ic=&s=undefined&hd=&latest=&copyright=&se=&sme=&tab=0&width=&height=&face=undefined&ist=&jit=&cg=&bdtype=0&oriquery=&objurl=http%3A%2F%2Fimg8.zol.com.cn%2Fbbs%2Fupload%2F14417%2F14416546.jpg&fromurl=ippr_z2C%24qAzdH3FAzdH3F1vkkf_z%26e3Bz5s_z%26e3Bv54_z%26e3BvgAzdH3Fl0AzdH3Fmc0_lmdam9_z%26e3Bip4s&gsm=2&rpstart=0&rpnum=0&islist=&querylist=&force=undefined";
-    var imageType="URL";
-    client.detect(image,imageType).then(function (result){
-        return res.json(new PKG(result));
-    }).catch(function(err){
-        return res.json(new Error(err,410));
-    });
-}
 function intialbaidu(){
     // 设置request库的一些参数，例如代理服务地址，超时时间等
     // request参数请参考 https://github.com/request/request#requestoptions-callback
@@ -89,12 +83,9 @@ function faceSearch(client,image,imageType,response){
     });
 }
 
-function faceRegister(client,image,imageType,response){
-    var groupId = "group1";
-    var userId = "user1";
-
+function faceRegister(client,image,imageType,response){ 
     // 调用人脸注册
-    client.addUser(image, imageType, groupId, userId).then(function(result) {
+    client.addUser(image, imageType, groupId, userId,user_info).then(function(result) {
         console.log(JSON.stringify(result));
         return response.json((result));
     }).catch(function(err) {
@@ -102,4 +93,22 @@ function faceRegister(client,image,imageType,response){
         console.log(err);
         return response.json(new Error(err,410));
     });
+}
+
+function faceUpdate(client,image,imageType,response){
+    // 如果有可选参数
+    var options = {};
+    options["user_info"] = user_info;
+    // options["quality_control"] = "NORMAL";
+    // options["liveness_control"] = "LOW";
+    // options["action_type"] = "REPLACE";
+    // 调用人脸更新
+    client.updateUser(image, imageType, groupId, userId, options).then(function(result) {
+        console.log(JSON.stringify(result));
+        return response.json((result));
+    }).catch(function(err) {
+        // 如果发生网络错误
+        console.log(err);
+        return response.json(new Error(err,410));
+    });;
 }
